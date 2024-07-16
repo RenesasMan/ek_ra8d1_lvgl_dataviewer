@@ -1,6 +1,7 @@
 #include "fft_thread.h"
 #include "config.h"
 #include "SEGGER_RTT/SEGGER_RTT.h"
+#include "lv_data_viewer.h"
 
 
 /* Application error */
@@ -15,6 +16,14 @@
 
 #define APP_PRINT(fn_, ...)      SEGGER_RTT_printf (SEGGER_INDEX,(fn_), ##__VA_ARGS__);
 #define SEGGER_INDEX            (0)
+
+extern lv_chart_series_t* series_fft_unfiltered; //unfiltered freq domain
+extern lv_chart_series_t* series_fft_filtered; //filtered freq domain
+extern lv_chart_series_t* series_analog_unfiltered; //unfiltered time domain
+extern lv_chart_series_t* series_analog_filtered; //filtered time domain
+
+extern lv_obj_t* chart_time;
+extern lv_obj_t* chart_freq;
 
 int16_t real_fft_mag_f32(float32_t* input, float32_t* output, float32_t* magnitude);
 void fir_f32(float32_t* input, float32_t* output);
@@ -39,6 +48,10 @@ const float32_t fir_coeffs_f32[NUM_TAPS] = {
     0.24373020f, 0.19245540f, 0.11114350f, 0.03102797f, -0.02230165f, -0.03981645f, -0.02973091f, -0.00917451f,
     0.00675930f, 0.01180361f, 0.00833250f, 0.00236951f, -0.00158749f, -0.00256194f, -0.00181857f, -0.00063047f
 };
+
+
+
+
 
 void g_timer1_cb(timer_callback_args_t *p_args)
 {
@@ -102,6 +115,10 @@ void fft_thread_entry(void *pvParameters)
     buffer_full = true;
     #endif
 
+    vTaskDelay (250);
+
+    volatile uint16_t my_index;
+    float32_t sample;
 
     while (1)
     {
@@ -109,10 +126,12 @@ void fft_thread_entry(void *pvParameters)
         {
             #ifdef USE_ADC_DATA
             // Process ADC data buffer
-            for (uint16_t i = 0; i < SAMPLE_BUFFER_LENGTH; i++) {
-                float32_t sample = ((float32_t)raw_adc_buffer[i] / 4095.0f) * vref;
-                real_input_signal_f32[i] = sample - (vref / 2.0f);
+            for (my_index = 0; my_index < SAMPLE_BUFFER_LENGTH; my_index++)
+            {
+                sample = ((float32_t)raw_adc_buffer[my_index] / 4095.0f) * vref;
+                real_input_signal_f32[my_index] = sample - (vref / 2.0f);
             }
+
             __disable_irq();
 
             // Reset buffer index and flag
@@ -180,7 +199,30 @@ void fft_thread_entry(void *pvParameters)
             APP_PRINT("FFT filtered signal clock cycle: %d\n", fft2_cycle);
             APP_PRINT("Total clock cycle: %d\n", total_cycle);
             #endif
-//            vTaskDelay (1);
+
+            //process and copy over the analog data
+            for( my_index = 0; my_index < SAMPLE_BUFFER_LENGTH; my_index++ )
+            {
+                series_analog_unfiltered->y_points[my_index] = (int32_t)(REALTIME_UNFILTERED_MULTIPLIER*real_input_signal_f32[my_index]);
+                series_analog_filtered->y_points[my_index] = (int32_t)(REALTIME_FILTERED_MULTIPLIER*filtered_output_f32[my_index]);
+            }
+
+            //process and copy over the fft data
+            for( my_index = 0; my_index < SAMPLE_BUFFER_LENGTH/2; my_index++ )
+            {
+                series_fft_unfiltered->y_points[my_index] = (int32_t)(FFT_UNFILTERED_MULTIPLIER*unfiltered_FFT_mag_f32[my_index]);
+                series_fft_filtered->y_points[my_index] = (int32_t)(FFT_FILTERED_MULTIPLIER*filtered_FFT_mag_f32[my_index]);
+            }
+
+//            lv_chart_refresh(chart_time); /*Required after direct set*/
+//            lv_chart_refresh(chart_freq); /*Required after direct set*/
+
+            APP_PRINT("Place holder\n", total_cycle);
+            vTaskDelay (1);
+        }
+        else
+        {
+            vTaskDelay (33); //run every 33ms for 30 updates per second.
         }
     }
 }

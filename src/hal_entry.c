@@ -44,6 +44,14 @@ void R_BSP_WarmStart(bsp_warm_start_event_t event)
 
         /* Configure pins. */
         R_IOPORT_Open (&g_ioport_ctrl, &IOPORT_CFG_NAME);
+
+        /* Enable individual fault handlers */
+        SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | \
+                   SCB_SHCSR_BUSFAULTENA_Msk | \
+                   SCB_SHCSR_MEMFAULTENA_Msk |
+                   SCB_SHCSR_SECUREFAULTENA_Msk);
+
+        bsp_sdram_init(); //SDRAM pins need to be set to HIGH drive strength in pin configuration
     }
 }
 

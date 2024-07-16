@@ -118,38 +118,9 @@
       <configSetting altId="ether_rmii.rmii0_txd0.p700" configurationId="ether_rmii.rmii0_txd0"/>
       <configSetting altId="ether_rmii.rmii0_txd1.p406" configurationId="ether_rmii.rmii0_txd1"/>
       <configSetting altId="ether_rmii.rmii0_txd_en.p405" configurationId="ether_rmii.rmii0_txd_en"/>
-      <configSetting altId="glcd.lcd_clk.p806" configurationId="glcd.lcd_clk"/>
-      <configSetting altId="glcd.lcd_data0.p914" configurationId="glcd.lcd_data0"/>
-      <configSetting altId="glcd.lcd_data1.p915" configurationId="glcd.lcd_data1"/>
-      <configSetting altId="glcd.lcd_data10.p711" configurationId="glcd.lcd_data10"/>
-      <configSetting altId="glcd.lcd_data11.p712" configurationId="glcd.lcd_data11"/>
-      <configSetting altId="glcd.lcd_data12.p713" configurationId="glcd.lcd_data12"/>
-      <configSetting altId="glcd.lcd_data13.p714" configurationId="glcd.lcd_data13"/>
-      <configSetting altId="glcd.lcd_data14.p715" configurationId="glcd.lcd_data14"/>
-      <configSetting altId="glcd.lcd_data15.pb07" configurationId="glcd.lcd_data15"/>
-      <configSetting altId="glcd.lcd_data16.pb06" configurationId="glcd.lcd_data16"/>
-      <configSetting altId="glcd.lcd_data17.pb05" configurationId="glcd.lcd_data17"/>
-      <configSetting altId="glcd.lcd_data18.pb01" configurationId="glcd.lcd_data18"/>
-      <configSetting altId="glcd.lcd_data19.pb04" configurationId="glcd.lcd_data19"/>
-      <configSetting altId="glcd.lcd_data2.p910" configurationId="glcd.lcd_data2"/>
-      <configSetting altId="glcd.lcd_data20.pb03" configurationId="glcd.lcd_data20"/>
-      <configSetting altId="glcd.lcd_data21.pb02" configurationId="glcd.lcd_data21"/>
-      <configSetting altId="glcd.lcd_data22.pb00" configurationId="glcd.lcd_data22"/>
-      <configSetting altId="glcd.lcd_data23.p707" configurationId="glcd.lcd_data23"/>
-      <configSetting altId="glcd.lcd_data3.p911" configurationId="glcd.lcd_data3"/>
-      <configSetting altId="glcd.lcd_data4.p912" configurationId="glcd.lcd_data4"/>
-      <configSetting altId="glcd.lcd_data5.p913" configurationId="glcd.lcd_data5"/>
-      <configSetting altId="glcd.lcd_data6.p904" configurationId="glcd.lcd_data6"/>
-      <configSetting altId="glcd.lcd_data7.p903" configurationId="glcd.lcd_data7"/>
-      <configSetting altId="glcd.lcd_data8.p902" configurationId="glcd.lcd_data8"/>
-      <configSetting altId="glcd.lcd_data9.p207" configurationId="glcd.lcd_data9"/>
-      <configSetting altId="glcd.lcd_extclk.p514" configurationId="glcd.lcd_extclk"/>
-      <configSetting altId="glcd.lcd_tcon0.p805" configurationId="glcd.lcd_tcon0"/>
-      <configSetting altId="glcd.lcd_tcon1.p807" configurationId="glcd.lcd_tcon1"/>
-      <configSetting altId="glcd.lcd_tcon2.p513" configurationId="glcd.lcd_tcon2"/>
-      <configSetting altId="glcd.lcd_tcon3.p515" configurationId="glcd.lcd_tcon3"/>
-      <configSetting altId="iic1.scl1.p512" configurationId="iic1.scl1"/>
-      <configSetting altId="iic1.sda1.p511" configurationId="iic1.sda1"/>
+      <configSetting altId="iic1.scl1.p512" configurationId="iic1.scl1" isUsedByDriver="true"/>
+      <configSetting altId="iic1.sda1.p511" configurationId="iic1.sda1" isUsedByDriver="true"/>
+      <configSetting altId="irq3.irq3.p510" configurationId="irq3.irq3" isUsedByDriver="true"/>
       <configSetting altId="jtag_fslash_swd.tck.p211" configurationId="jtag_fslash_swd.tck"/>
       <configSetting altId="jtag_fslash_swd.tdi.p208" configurationId="jtag_fslash_swd.tdi"/>
       <configSetting altId="jtag_fslash_swd.tdo.p209" configurationId="jtag_fslash_swd.tdo"/>
@@ -169,6 +140,7 @@
       <configSetting altId="ospi.om_sio6.p802" configurationId="ospi.om_sio6"/>
       <configSetting altId="ospi.om_sio7.p804" configurationId="ospi.om_sio7"/>
       <configSetting altId="p107.output.low" configurationId="p107"/>
+      <configSetting altId="p404.output.low" configurationId="p404"/>
       <configSetting altId="p414.output.low" configurationId="p414"/>
       <configSetting altId="p504.input" configurationId="p504"/>
       <configSetting altId="p505.input" configurationId="p505"/>
@@ -181,7 +153,7 @@
       <configSetting altId="p811.input" configurationId="p811"/>
       <configSetting altId="p813.output.low" configurationId="p813"/>
       <configSetting altId="p907.input" configurationId="p907"/>
-      <configSetting altId="pa01.input" configurationId="pa01"/>
+      <configSetting altId="pa01.output.low" configurationId="pa01"/>
       <configSetting altId="pa06.input" configurationId="pa06"/>
       <configSetting altId="pa07.input" configurationId="pa07"/>
       <configSetting altId="pa11.input" configurationId="pa11"/>
@@ -192,8 +164,8 @@
       <configSetting altId="sci2.txd2.pa03" configurationId="sci2.txd2"/>
       <configSetting altId="sci3.rxd3.p408" configurationId="sci3.rxd3"/>
       <configSetting altId="sci3.txd3.p409" configurationId="sci3.txd3"/>
-      <configSetting altId="sci9.rxd9.pa15" configurationId="sci9.rxd9"/>
-      <configSetting altId="sci9.txd9.pa14" configurationId="sci9.txd9"/>
+      <configSetting altId="sci9.rxd9.pa15" configurationId="sci9.rxd9" isUsedByDriver="true"/>
+      <configSetting altId="sci9.txd9.pa14" configurationId="sci9.txd9" isUsedByDriver="true"/>
       <configSetting altId="sdram.a1.p300" configurationId="sdram.a1"/>
       <configSetting altId="sdram.a10.p309" configurationId="sdram.a10"/>
       <configSetting altId="sdram.a11.p310" configurationId="sdram.a11"/>
