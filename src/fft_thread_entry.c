@@ -163,7 +163,7 @@ void fft_thread_entry(void *pvParameters)
 
             // FFT modifies the source data so need to copy to temp buffer
             #ifdef USE_ADC_DATA
-            memcpy(real_input_signal_copy_f32, real_input_signal_f32, SAMPLE_BUFFER_LENGTH);
+            memcpy(real_input_signal_copy_f32, real_input_signal_f32, SAMPLE_BUFFER_LENGTH*sizeof(float32_t));
             #else
             memcpy(temp_buffer, test_input_signal_f32, SAMPLE_BUFFER_LENGTH);
             #endif
@@ -185,7 +185,7 @@ void fft_thread_entry(void *pvParameters)
 
             // FFT modifies the source data so need to copy to temp buffer
             #ifdef USE_ADC_DATA
-            memcpy(filtered_output_copy_f32, filtered_output_f32, SAMPLE_BUFFER_LENGTH);
+            memcpy(filtered_output_copy_f32, filtered_output_f32, SAMPLE_BUFFER_LENGTH*sizeof(float32_t));
             #else
             memcpy(temp_buffer, test_input_signal_f32, SAMPLE_BUFFER_LENGTH);
             #endif
