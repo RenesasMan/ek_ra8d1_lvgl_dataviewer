@@ -129,7 +129,8 @@ void fft_thread_entry(void *pvParameters)
             for (my_index = 0; my_index < SAMPLE_BUFFER_LENGTH; my_index++)
             {
                 sample = ((float32_t)raw_adc_buffer[my_index] / 4095.0f) * vref;
-                real_input_signal_f32[my_index] = sample - (vref / 2.0f);
+//                real_input_signal_f32[my_index] = sample - (vref / 2.0f);
+                real_input_signal_f32[my_index] = sample*(100.0f/3.0f); //scale the value to 0-100
             }
 
             __disable_irq();
@@ -204,7 +205,7 @@ void fft_thread_entry(void *pvParameters)
             for( my_index = 0; my_index < SAMPLE_BUFFER_LENGTH; my_index++ )
             {
                 series_analog_unfiltered->y_points[my_index] = (int32_t)(REALTIME_UNFILTERED_MULTIPLIER*real_input_signal_f32[my_index]);
-                series_analog_filtered->y_points[my_index] = (int32_t)(REALTIME_FILTERED_MULTIPLIER*filtered_output_f32[my_index]);
+                series_analog_filtered->y_points[my_index] = (int32_t)(REALTIME_FILTERED_MULTIPLIER*(filtered_output_f32[my_index] + 330));
             }
 
             //process and copy over the fft data
@@ -213,9 +214,6 @@ void fft_thread_entry(void *pvParameters)
                 series_fft_unfiltered->y_points[my_index] = (int32_t)(FFT_UNFILTERED_MULTIPLIER*unfiltered_FFT_mag_f32[my_index]);
                 series_fft_filtered->y_points[my_index] = (int32_t)(FFT_FILTERED_MULTIPLIER*filtered_FFT_mag_f32[my_index]);
             }
-
-//            lv_chart_refresh(chart_time); /*Required after direct set*/
-//            lv_chart_refresh(chart_freq); /*Required after direct set*/
 
             APP_PRINT("Place holder\n", total_cycle);
             vTaskDelay (1);
