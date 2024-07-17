@@ -6,16 +6,22 @@
  */
 #include "config.h"
 #include "arm_math.h"
+
 float32_t unfiltered_FFT_output_f32[SAMPLE_BUFFER_LENGTH];
 volatile float32_t unfiltered_FFT_mag_f32[SAMPLE_BUFFER_LENGTH/2];
-volatile float32_t filtered_output_f32[SAMPLE_BUFFER_LENGTH];
+
 float32_t filtered_FFT_output_f32[SAMPLE_BUFFER_LENGTH];
 volatile float32_t filtered_FFT_mag_f32[SAMPLE_BUFFER_LENGTH/2];
 
 float32_t temp_buffer[SAMPLE_BUFFER_LENGTH];
 uint32_t raw_adc_buffer[SAMPLE_BUFFER_LENGTH];
 
-float32_t real_input_signal_f32[SAMPLE_BUFFER_LENGTH];
+volatile float32_t real_input_signal_f32[SAMPLE_BUFFER_LENGTH];
+volatile float32_t filtered_output_f32[SAMPLE_BUFFER_LENGTH];
+
+volatile float32_t real_input_signal_copy_f32[SAMPLE_BUFFER_LENGTH];
+volatile float32_t filtered_output_copy_f32[SAMPLE_BUFFER_LENGTH];
+
 float32_t test_input_signal_f32[SAMPLE_BUFFER_LENGTH] =
 {
  0.000000f, 0.254508f, 0.293893f, 0.304509f, 0.475528f, 0.600000f, 0.475528f, 0.304509f,

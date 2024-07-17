@@ -38,6 +38,9 @@ extern float32_t filtered_FFT_mag_f32[SAMPLE_BUFFER_LENGTH/2];
 extern float32_t temp_buffer[SAMPLE_BUFFER_LENGTH];
 extern uint32_t raw_adc_buffer[SAMPLE_BUFFER_LENGTH];
 
+extern float32_t real_input_signal_copy_f32[SAMPLE_BUFFER_LENGTH];
+extern float32_t filtered_output_copy_f32[SAMPLE_BUFFER_LENGTH];
+
 static volatile uint16_t buffer_index = 0;
 static volatile bool buffer_full = false;
 static const float32_t vref = 3.3f;
@@ -130,7 +133,7 @@ void fft_thread_entry(void *pvParameters)
             {
                 sample = ((float32_t)raw_adc_buffer[my_index] / 4095.0f) * vref;
 //                real_input_signal_f32[my_index] = sample - (vref / 2.0f);
-                real_input_signal_f32[my_index] = sample*(100.0f/3.0f); //scale the value to 0-100
+                real_input_signal_f32[my_index] = sample*(100.0f/vref); //scale the value to 0-100
             }
 
             __disable_irq();
@@ -160,13 +163,13 @@ void fft_thread_entry(void *pvParameters)
 
             // FFT modifies the source data so need to copy to temp buffer
             #ifdef USE_ADC_DATA
-            memcpy(temp_buffer, real_input_signal_f32, SAMPLE_BUFFER_LENGTH);
+            memcpy(real_input_signal_copy_f32, real_input_signal_f32, SAMPLE_BUFFER_LENGTH);
             #else
             memcpy(temp_buffer, test_input_signal_f32, SAMPLE_BUFFER_LENGTH);
             #endif
 
             // Generate unfiltered FFT from input signal
-            fft_status = real_fft_mag_f32(temp_buffer, unfiltered_FFT_output_f32, unfiltered_FFT_mag_f32);
+            fft_status = real_fft_mag_f32(real_input_signal_f32, unfiltered_FFT_output_f32, unfiltered_FFT_mag_f32);
             if (fft_status != ARM_MATH_SUCCESS) {
                 APP_PRINT("Error in FFT computation: %d\n", fft_status);
             }
@@ -178,6 +181,13 @@ void fft_thread_entry(void *pvParameters)
             fir_f32(real_input_signal_f32, filtered_output_f32);
             #ifdef INSTRUCTION_BENCH
             ts_filter = DWT->CYCCNT;
+            #endif
+
+            // FFT modifies the source data so need to copy to temp buffer
+            #ifdef USE_ADC_DATA
+            memcpy(filtered_output_copy_f32, filtered_output_f32, SAMPLE_BUFFER_LENGTH);
+            #else
+            memcpy(temp_buffer, test_input_signal_f32, SAMPLE_BUFFER_LENGTH);
             #endif
 
             // FFT filtered signal
@@ -204,8 +214,8 @@ void fft_thread_entry(void *pvParameters)
             //process and copy over the analog data
             for( my_index = 0; my_index < SAMPLE_BUFFER_LENGTH; my_index++ )
             {
-                series_analog_unfiltered->y_points[my_index] = (int32_t)(REALTIME_UNFILTERED_MULTIPLIER*real_input_signal_f32[my_index]);
-                series_analog_filtered->y_points[my_index] = (int32_t)(REALTIME_FILTERED_MULTIPLIER*(filtered_output_f32[my_index] + 330));
+                series_analog_unfiltered->y_points[my_index] = (int32_t)(REALTIME_UNFILTERED_MULTIPLIER*real_input_signal_copy_f32[my_index]);
+                series_analog_filtered->y_points[my_index] = (int32_t)(REALTIME_FILTERED_MULTIPLIER*(filtered_output_copy_f32[my_index] + 330));
             }
 
             //process and copy over the fft data
