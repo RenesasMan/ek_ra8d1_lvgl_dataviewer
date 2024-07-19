@@ -30,10 +30,6 @@ extern "C" {
       *      DEFINES
       *********************/
 
-#define FFT_UNFILTERED_MULTIPLIER (1.0f/100.0f)
-#define FFT_FILTERED_MULTIPLIER (1.0f/100.0f)
-#define REALTIME_UNFILTERED_MULTIPLIER 10
-#define REALTIME_FILTERED_MULTIPLIER REALTIME_UNFILTERED_MULTIPLIER
 
       /**********************
        *      TYPEDEFS

@@ -123,6 +123,18 @@ void fft_thread_entry(void *pvParameters)
     volatile uint16_t my_index;
     float32_t sample;
 
+#if(1U == ENABLE_GRAPH_NORMALIZATION)
+    volatile float32_t realtime_unfiltered_multiplier;
+    volatile float32_t realtime_unfiltered_offset;
+    volatile float32_t realtime_filtered_multiplier;
+    volatile float32_t realtime_filtered_offset;
+
+    volatile float32_t fft_unfiltered_multiplier;
+    volatile float32_t fft_unfiltered_offset;
+    volatile float32_t fft_filtered_multiplier;
+    volatile float32_t fft_filtered_offset;
+#endif
+
     while (1)
     {
         if(buffer_full)
@@ -211,11 +223,77 @@ void fft_thread_entry(void *pvParameters)
             APP_PRINT("Total clock cycle: %d\n", total_cycle);
             #endif
 
+
+#if(1U == ENABLE_GRAPH_NORMALIZATION)
+            /* DETERMINE DYNAMIC OFFSETS AND COFFECIENTS */
+
+            //Initialize min and max values
+            volatile float32_t unfiltered_min = real_input_signal_copy_f32[0];
+            volatile float32_t unfiltered_max = real_input_signal_copy_f32[0];
+            volatile float32_t filtered_min = filtered_output_copy_f32[0];
+            volatile float32_t filtered_max = filtered_output_copy_f32[0];
+
+            //Find normalization parameters for analog/realtime/time domain data
+            for( my_index = 1; my_index < SAMPLE_BUFFER_LENGTH-1; my_index++ )
+            {
+                unfiltered_min = real_input_signal_copy_f32[my_index] < unfiltered_min ? real_input_signal_copy_f32[my_index] : unfiltered_min;
+                unfiltered_max = real_input_signal_copy_f32[my_index] > unfiltered_max ? real_input_signal_copy_f32[my_index] : unfiltered_max;
+
+                filtered_min = filtered_output_copy_f32[my_index] < filtered_min ? filtered_output_copy_f32[my_index] : filtered_min;
+                filtered_max = filtered_output_copy_f32[my_index] > filtered_max ? filtered_output_copy_f32[my_index] : filtered_max;
+
+            }
+
+            realtime_unfiltered_multiplier =    GRAPH_NORMALIZATION_FACTOR/(unfiltered_max - unfiltered_min);
+            realtime_unfiltered_offset =        0;//unfiltered_min;
+            realtime_filtered_multiplier =      GRAPH_NORMALIZATION_FACTOR/(filtered_max - filtered_min);
+            realtime_filtered_offset =          0;//filtered_min;
+
+
+            /* DETERMINE DYNAMIC OFFSETS AND COFFECIENTS */
+
+            //Initialize min and max values
+            unfiltered_min = unfiltered_FFT_mag_f32[0];
+            unfiltered_max = unfiltered_FFT_mag_f32[0];
+            filtered_min = filtered_FFT_mag_f32[0];
+            filtered_max = filtered_FFT_mag_f32[0];
+
+            //Find normalization parameters for analog/realtime/time domain data
+            for( my_index = 1; my_index < (SAMPLE_BUFFER_LENGTH/2)-1; my_index++ )
+            {
+                unfiltered_min = unfiltered_FFT_mag_f32[my_index] < unfiltered_min ? unfiltered_FFT_mag_f32[my_index] : unfiltered_min;
+                unfiltered_max = unfiltered_FFT_mag_f32[my_index] > unfiltered_max ? unfiltered_FFT_mag_f32[my_index] : unfiltered_max;
+
+                filtered_min = filtered_FFT_mag_f32[my_index] < filtered_min ? filtered_FFT_mag_f32[my_index] : filtered_min;
+                filtered_max = filtered_FFT_mag_f32[my_index] > filtered_max ? filtered_FFT_mag_f32[my_index] : filtered_max;
+
+            }
+
+            fft_unfiltered_multiplier =     GRAPH_NORMALIZATION_FACTOR/(unfiltered_max - unfiltered_min);
+            fft_unfiltered_offset =         0;//unfiltered_min;
+            fft_filtered_multiplier =       GRAPH_NORMALIZATION_FACTOR/(filtered_max - filtered_min);
+            fft_filtered_offset =           0;//filtered_min;
+
+            //process and copy over the analog data
+            for( my_index = 0; my_index < SAMPLE_BUFFER_LENGTH; my_index++ )
+            {
+                series_analog_unfiltered->y_points[my_index] = (int32_t)(realtime_unfiltered_multiplier*real_input_signal_copy_f32[my_index] + realtime_unfiltered_offset);
+                series_analog_filtered->y_points[my_index] = (int32_t)(realtime_filtered_multiplier*(filtered_output_copy_f32[my_index] + realtime_filtered_offset));
+            }
+
+            //process and copy over the fft data
+            for( my_index = 0; my_index < SAMPLE_BUFFER_LENGTH/2; my_index++ )
+            {
+                series_fft_unfiltered->y_points[my_index] = (int32_t)(fft_unfiltered_multiplier*unfiltered_FFT_mag_f32[my_index] + fft_unfiltered_offset);
+                series_fft_filtered->y_points[my_index] = (int32_t)(fft_filtered_multiplier*filtered_FFT_mag_f32[my_index] + fft_filtered_offset);
+            }
+
+#else
             //process and copy over the analog data
             for( my_index = 0; my_index < SAMPLE_BUFFER_LENGTH; my_index++ )
             {
                 series_analog_unfiltered->y_points[my_index] = (int32_t)(REALTIME_UNFILTERED_MULTIPLIER*real_input_signal_copy_f32[my_index]);
-                series_analog_filtered->y_points[my_index] = (int32_t)(REALTIME_FILTERED_MULTIPLIER*(filtered_output_copy_f32[my_index] + 330));
+                series_analog_filtered->y_points[my_index] = (int32_t)(REALTIME_FILTERED_MULTIPLIER*(filtered_output_copy_f32[my_index] + REALTIME_FILTERED_OFFSET));
             }
 
             //process and copy over the fft data
@@ -224,13 +302,13 @@ void fft_thread_entry(void *pvParameters)
                 series_fft_unfiltered->y_points[my_index] = (int32_t)(FFT_UNFILTERED_MULTIPLIER*unfiltered_FFT_mag_f32[my_index]);
                 series_fft_filtered->y_points[my_index] = (int32_t)(FFT_FILTERED_MULTIPLIER*filtered_FFT_mag_f32[my_index]);
             }
+#endif
 
             APP_PRINT("Place holder\n", total_cycle);
-            vTaskDelay (1);
         }
         else
         {
-            vTaskDelay (33); //run every 33ms for 30 updates per second.
+            vTaskDelay (DATA_REFRESH_PERIOD); //run every 33ms for 30 updates per second.
         }
     }
 }

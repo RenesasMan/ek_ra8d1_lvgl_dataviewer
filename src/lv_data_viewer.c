@@ -66,7 +66,7 @@ static lv_obj_t* label_button_data_select;
 #define FILTERED_BIT_MASK 1<<1; //the 1st bit enables the filtered series
 #define DOMAIN_BIT_MASK 1<<2; //the 2nd bit masks which series is enabled
 
-static uint8_t series_hidden_bitfield = 0b011; //default is frequency domain, unfiltered
+static uint8_t g_series_hidden_bitfield = 0b011; //default is frequency domain, unfiltered
 
 lv_obj_t* chart_time;
 lv_obj_t* chart_freq;
@@ -268,6 +268,10 @@ static void event_chart_cb(lv_event_t* e)
 #define CHART4_MIN 50
 #define CHART4_MAX 100
 
+// This function activates upon press of the Frequency/Time domain button
+// This toggles the visibility and label of the F/T button domain
+//
+
 static void event_button_domain_cb(lv_event_t* e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -290,35 +294,41 @@ static void event_button_domain_cb(lv_event_t* e)
     }
 }
 
+
+
 static void event_button_data_select_cb(lv_event_t* e)
 {
     lv_event_code_t code = lv_event_get_code(e);
 
     if (code == LV_EVENT_PRESSED)
     {
-        if (0b11u == series_hidden_bitfield)
+        //Case 1: From all visible
+        // Only show unfiltered series
+        if (0b11u == g_series_hidden_bitfield)
         {
-            series_hidden_bitfield = 0b10u;
+            g_series_hidden_bitfield = 0b10u;
             lv_chart_hide_series(chart_freq, series_fft_unfiltered, 0);
             lv_chart_hide_series(chart_freq, series_fft_filtered, 1);
             lv_chart_hide_series(chart_freq, series_analog_unfiltered, 0);
             lv_chart_hide_series(chart_freq, series_analog_filtered, 1);
-            lv_label_set_text(label_button_data_select, "Filtered");
+            lv_label_set_text(label_button_data_select, "Unfiltered");
             lv_obj_set_style_bg_color(button_data_select, lv_palette_main(LV_PALETTE_GREEN), LV_PART_MAIN);
         }
-        else if (0b10u == series_hidden_bitfield)
+        //Case 2: From all visible
+        // Only show unfiltered series
+        else if (0b10u == g_series_hidden_bitfield)
         {
-            series_hidden_bitfield = 0b01;
+            g_series_hidden_bitfield = 0b01;
             lv_chart_hide_series(chart_freq, series_fft_unfiltered, 1);
             lv_chart_hide_series(chart_freq, series_fft_filtered, 0);
             lv_chart_hide_series(chart_freq, series_analog_unfiltered, 1);
             lv_chart_hide_series(chart_freq, series_analog_filtered, 0);
-            lv_label_set_text(label_button_data_select, "Unfiltered");
+            lv_label_set_text(label_button_data_select, "Filtered");
             lv_obj_set_style_bg_color(button_data_select, lv_palette_main(LV_PALETTE_ORANGE), LV_PART_MAIN);
         }
         else //case of 0b01
         {
-            series_hidden_bitfield = 0b11;
+            g_series_hidden_bitfield = 0b11;
             lv_chart_hide_series(chart_freq, series_fft_unfiltered, 0);
             lv_chart_hide_series(chart_freq, series_fft_filtered, 0);
             lv_chart_hide_series(chart_freq, series_analog_unfiltered, 0);
@@ -432,6 +442,7 @@ static void logs_tab_create(lv_obj_t* parent)
 {
     lv_obj_t* panel1 = lv_obj_create(parent);
     lv_obj_set_height(panel1, LV_SIZE_CONTENT);
+    lv_obj_set_width(panel1, 400);
 
     lv_obj_t* name = lv_label_create(panel1);
     lv_label_set_text(name, "Coming Soon!");
@@ -443,6 +454,7 @@ void analytics_tab_create(lv_obj_t* parent)
 {
     lv_obj_t* panel1 = lv_obj_create(parent);
     lv_obj_set_height(panel1, LV_SIZE_CONTENT);
+    lv_obj_set_width(panel1, 400);
 
     lv_obj_t* name = lv_label_create(panel1);
     lv_label_set_text(name, "Coming Soon!");
