@@ -70,6 +70,8 @@ static uint8_t g_series_hidden_bitfield = 0b011; //default is frequency domain, 
 
 lv_obj_t* chart_time;
 lv_obj_t* chart_freq;
+lv_obj_t* scale_bottom_freq;
+lv_obj_t* scale_bottom_time;
 
 lv_chart_series_t* series_fft_unfiltered;
 lv_chart_series_t* series_fft_filtered;
@@ -281,14 +283,22 @@ static void event_button_domain_cb(lv_event_t* e)
         if (lv_obj_has_flag(chart_time, LV_OBJ_FLAG_HIDDEN))
         {
             lv_obj_add_flag(chart_freq, LV_OBJ_FLAG_HIDDEN); //hide freq chart
+            lv_obj_add_flag(scale_bottom_freq, LV_OBJ_FLAG_HIDDEN); //hide freq scale
+
+
             lv_obj_remove_flag(chart_time, LV_OBJ_FLAG_HIDDEN); //show time chart
+            lv_obj_remove_flag(scale_bottom_time, LV_OBJ_FLAG_HIDDEN); //show time scale
             lv_label_set_text(label_button_domain, "Time Domain");
 
         }
         else
         {
             lv_obj_add_flag(chart_time, LV_OBJ_FLAG_HIDDEN); //hide time chart
+            lv_obj_add_flag(scale_bottom_time, LV_OBJ_FLAG_HIDDEN); //hide time scale
+
             lv_obj_remove_flag(chart_freq, LV_OBJ_FLAG_HIDDEN); //show freq chart
+            lv_obj_remove_flag(scale_bottom_freq, LV_OBJ_FLAG_HIDDEN); //show freq scale
+
             lv_label_set_text(label_button_domain, "Frequency Domain");
         }
     }
@@ -384,17 +394,31 @@ static void chart_tab_create(lv_obj_t* parent)
     lv_label_set_text(label_button_data_select, "Filtered & Unfiltered");
     lv_obj_center(label_button_data_select);
 
-    /*Create a chart*/
-    chart_freq = lv_chart_create(parent);
-    lv_obj_set_size(chart_freq, 430, 750);
+    //Under the buttons, create a container for the charts
+    /*Create a container*/
+    lv_obj_t* main_cont = lv_obj_create(parent);
+    lv_obj_set_size(main_cont, 430, 750);
+    //lv_obj_center(main_cont);
+    lv_obj_add_flag(main_cont, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+
+    /*Create a transparent wrapper for the chart and the scale.
+ *Set a large width, to make it scrollable on the main container*/
+    lv_obj_t* wrapper = lv_obj_create(main_cont);
+    lv_obj_remove_style_all(wrapper);
+    lv_obj_set_size(wrapper, lv_pct(200), lv_pct(100));
+    lv_obj_set_flex_flow(wrapper, LV_FLEX_FLOW_COLUMN);
+
+    /*Create the Frequency Domain chart*/
+    chart_freq = lv_chart_create(wrapper);
+    lv_obj_set_size(chart_freq, lv_pct(100), lv_pct(100));
     lv_obj_center(chart_freq);
-    //lv_chart_set_type(chart, LV_CHART_TYPE_SCATTER);// LV_CHART_TYPE_LINE);   /*Show lines and points too*/
     lv_chart_set_type(chart_freq, CHART_TYPE);
-    lv_chart_set_point_count(chart_freq, MY_DATA_SIZE/2);
+    lv_chart_set_point_count(chart_freq, MY_DATA_SIZE / 2);
     lv_obj_set_style_radius(chart_freq, 0, 0);
     //lv_obj_set_style_line_width(chart, 0, LV_PART_ITEMS);   /*Remove the lines*/
     lv_obj_set_style_width(chart_freq, 0, LV_PART_INDICATOR);   /*Remove the points*/
     lv_obj_set_style_line_opa(chart_freq, 99, LV_PART_ITEMS);
+    lv_obj_set_style_line_width(chart_freq, 5, LV_PART_ITEMS);
     lv_obj_set_style_opa(chart_freq, 99, LV_PART_INDICATOR);
     lv_obj_set_style_pad_column(chart_freq, 1, 0);
     lv_obj_add_event_cb(chart_freq, event_chart_cb, LV_EVENT_ALL, NULL);
@@ -402,26 +426,48 @@ static void chart_tab_create(lv_obj_t* parent)
     lv_obj_set_flex_grow(chart_freq, 1);
     lv_obj_add_flag(chart_freq, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
+    /*Create a scale also with 100% width*/
+    scale_bottom_freq = lv_scale_create(wrapper);
+    lv_scale_set_mode(scale_bottom_freq, LV_SCALE_MODE_HORIZONTAL_BOTTOM);
+    lv_obj_set_size(scale_bottom_freq, lv_pct(100), 25);
+    lv_scale_set_total_tick_count(scale_bottom_freq, 10);
+    lv_scale_set_major_tick_every(scale_bottom_freq, 1);
+    lv_obj_set_style_pad_hor(scale_bottom_freq, lv_chart_get_first_point_center_offset(chart_freq), 0);
+
+    static const char* scale_values_freq[] = { "0Hz", "1kHz", "2kHz", "3kHz", "4kHz", "5kHz", "6kHz", "7kHz", "8kHz", "9kHz", "10kHz", "11kHz", NULL };
+    lv_scale_set_text_src(scale_bottom_freq, scale_values_freq);
+
     /*Add two data series*/
     series_fft_unfiltered = lv_chart_add_series(chart_freq, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
     series_fft_filtered = lv_chart_add_series(chart_freq, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_SECONDARY_Y);
 
     /*Create a chart*/
-    chart_time = lv_chart_create(parent);
-    lv_obj_set_size(chart_time, 430, 750);
+    chart_time = lv_chart_create(wrapper);
+    lv_obj_set_size(chart_time, lv_pct(100), lv_pct(100));
     lv_obj_center(chart_time);
-    //lv_chart_set_type(chart, LV_CHART_TYPE_SCATTER);// LV_CHART_TYPE_LINE);   /*Show lines and points too*/
     lv_chart_set_type(chart_time, CHART_TYPE);
     lv_chart_set_point_count(chart_time, MY_DATA_SIZE);
     lv_obj_set_style_radius(chart_time, 0, 0);
     //lv_obj_set_style_line_width(chart, 0, LV_PART_ITEMS);   /*Remove the lines*/
     lv_obj_set_style_width(chart_time, 0, LV_PART_INDICATOR);   /*Remove the points*/
     lv_obj_set_style_line_opa(chart_time, 99, LV_PART_ITEMS);
+    lv_obj_set_style_line_width(chart_time, 5, LV_PART_ITEMS);
     lv_obj_set_style_opa(chart_time, 99, LV_PART_INDICATOR);
     lv_obj_set_style_pad_column(chart_time, 1, 0);
     lv_obj_add_event_cb(chart_time, event_chart_cb, LV_EVENT_ALL, NULL);
     lv_obj_refresh_ext_draw_size(chart_time);
     lv_obj_set_flex_grow(chart_time, 1);
+
+    /*Create a scale also with 100% width*/
+    scale_bottom_time = lv_scale_create(wrapper);
+    lv_scale_set_mode(scale_bottom_time, LV_SCALE_MODE_HORIZONTAL_BOTTOM);
+    lv_obj_set_size(scale_bottom_time, lv_pct(100), 25);
+    lv_scale_set_total_tick_count(scale_bottom_time, 10);
+    lv_scale_set_major_tick_every(scale_bottom_time, 1);
+    lv_obj_set_style_pad_hor(scale_bottom_time, lv_chart_get_first_point_center_offset(chart_time), 0);
+
+    static const char* scale_values_time[] = { "0ms", "5ms", "10ms", "15ms", "20ms", "25ms", "30ms", "35ms", "40ms", "45ms", "50ms", "55ms", NULL };
+    lv_scale_set_text_src(scale_bottom_time, scale_values_time);
 
     series_analog_unfiltered = lv_chart_add_series(chart_time, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_SECONDARY_Y);
     series_analog_filtered = lv_chart_add_series(chart_time, lv_palette_main(LV_PALETTE_DEEP_ORANGE), LV_CHART_AXIS_SECONDARY_Y);
@@ -435,6 +481,7 @@ static void chart_tab_create(lv_obj_t* parent)
     lv_timer_t * timer = lv_timer_create(my_timer, 1000/CHART_FPS,  &chart_refresh_fps);
 
     lv_obj_add_flag(chart_time, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(scale_bottom_time, LV_OBJ_FLAG_HIDDEN);
 }
 
 
