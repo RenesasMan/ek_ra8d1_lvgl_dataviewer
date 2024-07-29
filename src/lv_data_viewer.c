@@ -204,56 +204,56 @@ static void event_chart_cb(lv_event_t* e)
         LV_LOG_USER("Selected point %d", (int)id);
 
         lv_chart_series_t* ser = lv_chart_get_series_next(chart, NULL);
-        while (ser) {
-            lv_point_t p;
-            lv_chart_get_point_pos_by_id(chart, ser, id, &p);
+//        while (ser) {
+//            lv_point_t p;
+//            lv_chart_get_point_pos_by_id(chart, ser, id, &p);
+//
+//            int32_t* y_array = lv_chart_get_y_array(chart, ser);
+//            int32_t value = y_array[id];
+//
+////            char buf[16];
+////            lv_snprintf(buf, sizeof(buf), LV_SYMBOL_DUMMY"$%d", value);
+//
+//            char buf[8];
+//            lv_snprintf(buf, sizeof(buf), "%"LV_PRIu32, value);
+//
+//
+//            lv_draw_rect_dsc_t draw_rect_dsc;
+//            lv_draw_rect_dsc_init(&draw_rect_dsc);
+//            draw_rect_dsc.bg_color = lv_color_black();
+//            draw_rect_dsc.bg_opa = LV_OPA_50;
+//            draw_rect_dsc.radius = 3;
+//            draw_rect_dsc.bg_image_recolor = lv_color_white();
+//
+//            volatile lv_area_t text_area_bg;
+//            text_area_bg.x1 = chart->coords.x1 + p.x - VALUE_BOX_WIDTH / 2;
+//            text_area_bg.x2 = chart->coords.x1 + p.x + VALUE_BOX_WIDTH / 2;
+//            text_area_bg.y1 = chart->coords.y1 + p.y - VALUE_BOX_HEIGHT / 2 - VALUE_BOX_YOFFSET;
+//            text_area_bg.y2 = chart->coords.y1 + p.y - VALUE_BOX_HEIGHT / 2 + VALUE_BOX_YOFFSET;
+//
+//            lv_area_t text_area;
+//            text_area.x1 = chart->coords.x1 + p.x - VALUE_BOX_WIDTH / 2 + LV_DPX(10);
+//            text_area.x2 = chart->coords.x1 + p.x + VALUE_BOX_WIDTH / 2;
+//            text_area.y1 = chart->coords.y1 + p.y - VALUE_BOX_HEIGHT / 2 - VALUE_BOX_YOFFSET;
+//            text_area.y2 = chart->coords.y1 + p.y - VALUE_BOX_HEIGHT / 2 + VALUE_BOX_YOFFSET;
+//
+//
+//            lv_layer_t* layer = lv_event_get_layer(e);
+//            lv_draw_rect(layer, &draw_rect_dsc, &text_area_bg);
+//
+//            lv_draw_label_dsc_t label_dsc;
+//            lv_draw_label_dsc_init(&label_dsc);
+//            label_dsc.color = lv_color_white();
+//            label_dsc.font = font_normal;
+//            label_dsc.text = buf;
+//            label_dsc.text_local = true;
+//            //lv_style_set_text_align(&label_dsc, LV_TEXT_ALIGN_CENTER);
+//            lv_draw_label(layer, &label_dsc, &text_area);
+//
+//            ser = lv_chart_get_series_next(chart, ser);
 
-            int32_t* y_array = lv_chart_get_y_array(chart, ser);
-            int32_t value = y_array[id];
 
-//            char buf[16];
-//            lv_snprintf(buf, sizeof(buf), LV_SYMBOL_DUMMY"$%d", value);
-
-            char buf[8];
-            lv_snprintf(buf, sizeof(buf), "%"LV_PRIu32, value);
-
-
-            lv_draw_rect_dsc_t draw_rect_dsc;
-            lv_draw_rect_dsc_init(&draw_rect_dsc);
-            draw_rect_dsc.bg_color = lv_color_black();
-            draw_rect_dsc.bg_opa = LV_OPA_50;
-            draw_rect_dsc.radius = 3;
-            draw_rect_dsc.bg_image_recolor = lv_color_white();
-
-            volatile lv_area_t text_area_bg;
-            text_area_bg.x1 = chart->coords.x1 + p.x - VALUE_BOX_WIDTH / 2;
-            text_area_bg.x2 = chart->coords.x1 + p.x + VALUE_BOX_WIDTH / 2;
-            text_area_bg.y1 = chart->coords.y1 + p.y - VALUE_BOX_HEIGHT / 2 - VALUE_BOX_YOFFSET;
-            text_area_bg.y2 = chart->coords.y1 + p.y - VALUE_BOX_HEIGHT / 2 + VALUE_BOX_YOFFSET;
-
-            lv_area_t text_area;
-            text_area.x1 = chart->coords.x1 + p.x - VALUE_BOX_WIDTH / 2 + LV_DPX(10);
-            text_area.x2 = chart->coords.x1 + p.x + VALUE_BOX_WIDTH / 2;
-            text_area.y1 = chart->coords.y1 + p.y - VALUE_BOX_HEIGHT / 2 - VALUE_BOX_YOFFSET;
-            text_area.y2 = chart->coords.y1 + p.y - VALUE_BOX_HEIGHT / 2 + VALUE_BOX_YOFFSET;
-
-
-            lv_layer_t* layer = lv_event_get_layer(e);
-            lv_draw_rect(layer, &draw_rect_dsc, &text_area_bg);
-
-            lv_draw_label_dsc_t label_dsc;
-            lv_draw_label_dsc_init(&label_dsc);
-            label_dsc.color = lv_color_white();
-            label_dsc.font = font_normal;
-            label_dsc.text = buf;
-            label_dsc.text_local = true;
-            //lv_style_set_text_align(&label_dsc, LV_TEXT_ALIGN_CENTER);
-            lv_draw_label(layer, &label_dsc, &text_area);
-
-            ser = lv_chart_get_series_next(chart, ser);
-
-
-        }
+//        }
     }
     else if (code == LV_EVENT_RELEASED) {
         lv_obj_invalidate(chart);
@@ -397,7 +397,7 @@ static void chart_tab_create(lv_obj_t* parent)
     //Under the buttons, create a container for the charts
     /*Create a container*/
     lv_obj_t* main_cont = lv_obj_create(parent);
-    lv_obj_set_size(main_cont, 430, 750);
+    lv_obj_set_size(main_cont, CHART_CONTAINER_WIDTH, CHART_CONTAINER_HEIGHT);
     //lv_obj_center(main_cont);
     lv_obj_add_flag(main_cont, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
@@ -419,9 +419,9 @@ static void chart_tab_create(lv_obj_t* parent)
     lv_obj_set_style_width(chart_freq, 0, LV_PART_INDICATOR);   /*Remove the points*/
     lv_obj_set_style_line_opa(chart_freq, 99, LV_PART_ITEMS);
     lv_obj_set_style_line_width(chart_freq, 5, LV_PART_ITEMS);
-    lv_obj_set_style_opa(chart_freq, 99, LV_PART_INDICATOR);
+    lv_obj_set_style_opa(chart_freq, 99, LV_PART_INDICATOR); //TODO clean this
     lv_obj_set_style_pad_column(chart_freq, 1, 0);
-    lv_obj_add_event_cb(chart_freq, event_chart_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(chart_freq, event_chart_cb, LV_EVENT_ALL, NULL); //TODO clean this?
     lv_obj_refresh_ext_draw_size(chart_freq);
     lv_obj_set_flex_grow(chart_freq, 1);
     lv_obj_add_flag(chart_freq, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);

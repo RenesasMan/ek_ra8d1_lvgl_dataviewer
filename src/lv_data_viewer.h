@@ -29,7 +29,8 @@ extern "C" {
      /*********************
       *      DEFINES
       *********************/
-
+#define CHART_CONTAINER_WIDTH 430
+#define CHART_CONTAINER_HEIGHT 700
 
       /**********************
        *      TYPEDEFS
