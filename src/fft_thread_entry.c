@@ -190,7 +190,7 @@ void fft_thread_entry(void *pvParameters)
             #endif
 
             // Filter input signal
-            fir_f32(real_input_signal_f32, filtered_output_f32);
+            fir_f32(real_input_signal_copy_f32, filtered_output_f32);
             #ifdef INSTRUCTION_BENCH
             ts_filter = DWT->CYCCNT;
             #endif
