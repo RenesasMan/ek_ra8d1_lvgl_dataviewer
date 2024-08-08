@@ -66,7 +66,7 @@ static lv_obj_t* label_button_data_select;
 #define FILTERED_BIT_MASK 1<<1; //the 1st bit enables the filtered series
 #define DOMAIN_BIT_MASK 1<<2; //the 2nd bit masks which series is enabled
 
-static uint8_t g_series_hidden_bitfield = 0b011; //default is frequency domain, unfiltered
+static uint8_t g_series_hidden_bitfield = 0b010; //default is frequency domain, unfiltered
 
 lv_obj_t* chart_time;
 lv_obj_t* chart_freq;
@@ -312,9 +312,9 @@ static void event_button_data_select_cb(lv_event_t* e)
 
     if (code == LV_EVENT_PRESSED)
     {
-        //Case 1: From all visible
+        //Case 1: From filtered
         // Only show unfiltered series
-        if (0b11u == g_series_hidden_bitfield)
+        if (0b01u == g_series_hidden_bitfield)
         {
             g_series_hidden_bitfield = 0b10u;
             lv_chart_hide_series(chart_freq, series_fft_unfiltered, 0);
@@ -324,9 +324,9 @@ static void event_button_data_select_cb(lv_event_t* e)
             lv_label_set_text(label_button_data_select, "Unfiltered");
             lv_obj_set_style_bg_color(button_data_select, lv_palette_main(LV_PALETTE_GREEN), LV_PART_MAIN);
         }
-        //Case 2: From all visible
-        // Only show unfiltered series
-        else if (0b10u == g_series_hidden_bitfield)
+        //Case 2: From Unfiltered
+        // Only show Filtered series
+    else if (0b10u == g_series_hidden_bitfield)
         {
             g_series_hidden_bitfield = 0b01;
             lv_chart_hide_series(chart_freq, series_fft_unfiltered, 1);
@@ -334,18 +334,18 @@ static void event_button_data_select_cb(lv_event_t* e)
             lv_chart_hide_series(chart_freq, series_analog_unfiltered, 1);
             lv_chart_hide_series(chart_freq, series_analog_filtered, 0);
             lv_label_set_text(label_button_data_select, "Filtered");
-            lv_obj_set_style_bg_color(button_data_select, lv_palette_main(LV_PALETTE_ORANGE), LV_PART_MAIN);
+            lv_obj_set_style_bg_color(button_data_select, lv_palette_main(LV_PALETTE_RED), LV_PART_MAIN);
         }
-        else //case of 0b01
-        {
-            g_series_hidden_bitfield = 0b11;
-            lv_chart_hide_series(chart_freq, series_fft_unfiltered, 0);
-            lv_chart_hide_series(chart_freq, series_fft_filtered, 0);
-            lv_chart_hide_series(chart_freq, series_analog_unfiltered, 0);
-            lv_chart_hide_series(chart_freq, series_analog_filtered, 0);
-            lv_label_set_text(label_button_data_select, "Filtered & Unfiltered");
-            lv_obj_set_style_bg_color(button_data_select, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN);
-        }
+//        else //Case 3: From Filtered
+//        {
+//            g_series_hidden_bitfield = 0b01;
+//            lv_chart_hide_series(chart_freq, series_fft_unfiltered, 0);
+//            lv_chart_hide_series(chart_freq, series_fft_filtered, 0);
+//            lv_chart_hide_series(chart_freq, series_analog_unfiltered, 0);
+//            lv_chart_hide_series(chart_freq, series_analog_filtered, 0);
+//            lv_label_set_text(label_button_data_select, "Filtered & Unfiltered");
+//            lv_obj_set_style_bg_color(button_data_select, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN);
+//        }
 
         lv_chart_refresh(chart_time); /*Required after direct set*/
         lv_chart_refresh(chart_freq); /*Required after direct set*/
@@ -391,7 +391,8 @@ static void chart_tab_create(lv_obj_t* parent)
     lv_obj_set_size(button_data_select, 200, 25);
 
     label_button_data_select = lv_label_create(button_data_select);
-    lv_label_set_text(label_button_data_select, "Filtered & Unfiltered");
+    lv_label_set_text(label_button_data_select, "Unfiltered");
+    lv_obj_set_style_bg_color(button_data_select, lv_palette_main(LV_PALETTE_GREEN), LV_PART_MAIN);
     lv_obj_center(label_button_data_select);
 
     //Under the buttons, create a container for the charts
@@ -469,8 +470,8 @@ static void chart_tab_create(lv_obj_t* parent)
     static const char* scale_values_time[] = { "0ms", "5ms", "10ms", "15ms", "20ms", "25ms", "30ms", "35ms", "40ms", "45ms", "50ms", "55ms", NULL };
     lv_scale_set_text_src(scale_bottom_time, scale_values_time);
 
-    series_analog_unfiltered = lv_chart_add_series(chart_time, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_SECONDARY_Y);
-    series_analog_filtered = lv_chart_add_series(chart_time, lv_palette_main(LV_PALETTE_DEEP_ORANGE), LV_CHART_AXIS_SECONDARY_Y);
+    series_analog_unfiltered = lv_chart_add_series(chart_time, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_SECONDARY_Y);
+    series_analog_filtered = lv_chart_add_series(chart_time, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_SECONDARY_Y);
 
 
     lv_chart_refresh(chart_time); /*Required after direct set*/
@@ -479,6 +480,10 @@ static void chart_tab_create(lv_obj_t* parent)
 
     static uint32_t chart_refresh_fps = CHART_FPS;
     lv_timer_t * timer = lv_timer_create(my_timer, 1000/CHART_FPS,  &chart_refresh_fps);
+
+    //Start with the filtered series hidden
+    lv_chart_hide_series(chart_freq, series_fft_filtered, 1);
+    lv_chart_hide_series(chart_freq, series_analog_filtered, 1);
 
     lv_obj_add_flag(chart_time, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(scale_bottom_time, LV_OBJ_FLAG_HIDDEN);
